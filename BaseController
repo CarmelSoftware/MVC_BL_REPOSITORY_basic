@@ -1,0 +1,26 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using TEST_BL;
+using TEST_BL.Models;
+
+namespace TEST.Utils
+{
+    public class BaseController : Controller
+    {
+        private Repository _db = new Repository();
+        internal Repository db
+        {
+            get
+            {
+                if (_db == null)
+                {
+                    _db = new Repository();
+                }
+                return _db;
+            }
+        }
+    }
+}
