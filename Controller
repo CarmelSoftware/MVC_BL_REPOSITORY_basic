@@ -1,0 +1,112 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Security;
+using TEST.Utils;
+using TEST_BL.Models;
+
+namespace TEST.Controllers
+{
+    [Authorize]
+    public class BlogController : BaseController
+    {
+        [AllowAnonymous]
+        public ActionResult Index()
+        {
+            IEnumerable<Blog> blogs = db.GetAllBlogs();
+            List<Blog> blogsList = blogs.ToList<Blog>();
+            return View(blogs);
+        }
+       
+        [AllowAnonymous]
+        public ActionResult Details(int id = 0)
+        {
+            Blog blog = db.GetBlog(id);
+            if (blog == null)
+            {
+                return HttpNotFound();
+            }
+            return View(blog);
+        }
+        
+        [Authorize(Roles="Admin")]
+        public ActionResult Create()
+        {
+            ViewBag.BloggerID = new SelectList(db.GetAllBloggers(), "BloggerID", "Name");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Users="ad")]
+        public ActionResult Create(Blog blog)
+        {
+            if (ModelState.IsValid)
+            {
+                db.AddBlog(blog);
+
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.BloggerID = new SelectList(db.GetAllBloggers(), "BloggerID", "Name", blog.BloggerID);
+            return View(blog);
+        }
+        
+        [Authorize(Roles="Admin")]
+        public ActionResult Edit(int id = 0)
+        {
+            Blog blog = db.GetBlog(id);
+            if (blog == null)
+            {
+                return HttpNotFound();
+            }
+            ViewBag.BloggerID = new SelectList(db.GetAllBloggers(), "BloggerID", "Name", blog.BloggerID);
+            blog.DatePosted = blog.DatePosted != null ? blog.DatePosted : DateTime.Now;
+            return View(blog);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles="Admin")]
+        public ActionResult Edit(Blog blog)
+        {
+            if (ModelState.IsValid)
+            {
+                db.Edit(blog);
+                return RedirectToAction("Index");
+            }
+            ViewBag.BloggerID = new SelectList(db.GetAllBloggers(), "BloggerID", "Name", blog.BloggerID);
+            return View(blog);
+        }
+        
+        [Authorize(Users="ad")]
+        public ActionResult Delete(int id = 0)
+        {
+            Blog blog = db.GetBlog(id);
+            if (blog == null)
+            {
+                return HttpNotFound();
+            }
+            return View(blog);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Users = "ad")]
+        public ActionResult DeleteConfirmed(int id)
+        {
+            db.RemoveBlog(id);
+            return RedirectToAction("Index");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            db.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}
