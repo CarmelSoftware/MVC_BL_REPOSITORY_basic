@@ -1,0 +1,73 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Data.Entity;
+using System.Text;
+using System.Threading.Tasks;
+using MVC_BL.Models;
+
+namespace MVC_BL
+{
+
+    public class Repository : IDisposable
+    {
+        private AdventureWorksEntities _db = new AdventureWorksEntities();
+        protected AdventureWorksEntities db
+        {
+            get
+            {
+                if (_db == null)
+                {
+                    _db = new AdventureWorksEntities();
+                }
+                return _db;
+            }
+
+        }
+        public IEnumerable<Blog> GetAllBlogs()
+        {
+            return db.Blogs.Include(b => b.Blogger);
+        }
+
+        public Blog GetBlog(int id)
+        {
+            return db.Blogs.Find(id);
+        }
+
+        public void AddBlog(Blog blog)
+        {
+            db.Blogs.Add(blog);
+            db.SaveChanges();
+        }
+
+        public void Edit(Blog blog)
+        {
+            db.Entry(blog).State = EntityState.Modified;
+            db.SaveChanges();
+        }
+
+        public void RemoveBlog(int id)
+        {
+            Blog blog = db.Blogs.Find(id);
+            db.Blogs.Remove(blog);
+            db.SaveChanges();
+        }
+
+        public IEnumerable<Blogger> GetAllBloggers()
+        {
+            return db.Bloggers;
+        }
+
+
+        public void Dispose()
+        {
+            this.db.Dispose();
+
+        }
+    }
+
+
+
+
+}
