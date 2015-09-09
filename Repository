@@ -12,6 +12,7 @@ namespace MVC_BL
 
     public class Repository : IDisposable
     {
+    
         private AdventureWorksEntities _db = new AdventureWorksEntities();
         protected AdventureWorksEntities db
         {
